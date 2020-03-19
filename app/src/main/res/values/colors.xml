@@ -7,4 +7,5 @@
     <color name="colorGreyDark">#555555</color>
     <color name="colorGreyLight">#cacaca</color>
     <color name="colorWhite">#FFF</color>
+    <color name="colorOrange">#f7941d</color>
 </resources>

@@ -3,4 +3,7 @@
     <string name="login">Login</string>
     <string name="username">USERNAME</string>
     <string name="field_required">Field required !!</string>
+    <string name="new_task">New Task</string>
+    <string name="task_title">Task Title</string>
+    <string name="create">Create</string>
 </resources>

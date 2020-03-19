@@ -6,6 +6,7 @@ import androidx.databinding.ObservableField
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
+import com.shaiik.utilities.Utilities
 import task.lobna.taskmanagement.R
 import task.lobna.taskmanagement.data.UserModel
 
@@ -25,6 +26,8 @@ class LoginViewModel : ViewModel() {
         if (username.isNullOrEmpty()) {
             usernameTextErrorObservable.set(view.context.getString(R.string.field_required))
         } else {
+            Utilities.hideKeyboard(view)
+            val loadingDialog = Utilities.showLoading(view.context)
             val db = FirebaseFirestore.getInstance().collection("users")
             db.whereEqualTo("username", username)
                 .limit(1)
@@ -42,7 +45,9 @@ class LoginViewModel : ViewModel() {
                                         username
                                     )
                                 userLogin.value = userModel
+                                Utilities.dismissLoading(loadingDialog)
                             }.addOnFailureListener { e ->
+                                Utilities.dismissLoading(loadingDialog)
                                 Log.e(TAG, "Error writing document", e)
                             }
                         } else {
@@ -54,8 +59,11 @@ class LoginViewModel : ViewModel() {
                                         doc.data!!["username"].toString()
                                     )
                                 userLogin.value = userModel
+                                Utilities.dismissLoading(loadingDialog)
                             }
                         }
+                    } else {
+                        Utilities.dismissLoading(loadingDialog)
                     }
                 }
         }

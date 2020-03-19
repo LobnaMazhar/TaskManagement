@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorWhite"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/margin_padding_size_large"
+        android:text="@string/new_task"
+        android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+        android:textColor="@color/colorGreyDark" />
+
+    <EditText
+        android:id="@+id/title_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_padding_size_medium"
+        android:layout_marginTop="@dimen/margin_padding_size_medium"
+        android:layout_marginEnd="@dimen/margin_padding_size_medium"
+        android:background="@drawable/shape_rectangle_rounded_8"
+        android:hint="@string/task_title"
+        android:inputType="textPersonName"
+        android:padding="@dimen/margin_padding_size_medium"
+        android:textColor="@color/colorGreyDark"
+        android:textColorHint="@color/colorGreyLight"
+        android:textSize="@dimen/text_size_medium" />
+
+    <Button
+        android:id="@+id/create_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_padding_size_medium"
+        android:layout_marginTop="@dimen/margin_padding_size_medium"
+        android:layout_marginBottom="@dimen/margin_padding_size_large"
+        android:layout_marginEnd="@dimen/margin_padding_size_medium"
+        android:background="@color/colorPrimary"
+        android:padding="@dimen/margin_padding_size_medium"
+        android:text="@string/create"
+        android:textAllCaps="true"
+        android:textColor="@color/colorWhite"
+        android:textSize="@dimen/text_size_large" />
+</LinearLayout>

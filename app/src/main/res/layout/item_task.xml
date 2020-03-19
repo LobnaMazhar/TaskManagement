@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="tivm"
+            type="task.lobna.taskmanagement.viewmodel.TaskItemViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorWhite">
+
+        <ImageView
+            android:id="@+id/tick_iv"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="@dimen/margin_padding_size_medium"
+            android:layout_marginTop="@dimen/margin_padding_size_medium"
+            android:layout_marginBottom="@dimen/margin_padding_size_medium"
+            android:src="@drawable/ic_tick_done"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/title_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_padding_size_medium"
+            android:layout_marginEnd="@dimen/margin_padding_size_medium"
+            android:text="@{tivm.taskObservable.title}"
+            android:textColor="@color/colorGreyDark"
+            android:textSize="@dimen/text_size_large"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/priority_layout"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toEndOf="@id/tick_iv"
+            app:layout_constraintTop_toTopOf="@id/tick_iv"
+            tools:text="Go to the shop" />
+
+        <TextView
+            android:id="@+id/date_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@{tivm.taskObservable.date}"
+            android:textColor="@color/colorGreyDark"
+            android:textSize="@dimen/text_size_medium"
+            app:layout_constraintEnd_toEndOf="@id/title_tv"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toStartOf="@id/title_tv"
+            app:layout_constraintTop_toBottomOf="@id/title_tv"
+            tools:text="December 15 2018" />
+
+        <LinearLayout
+            android:id="@+id/priority_layout"
+            android:layout_width="150dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="@dimen/margin_padding_size_medium"
+            android:background="@drawable/shape_rectangle_orange_rounded_8"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="!"
+                android:textColor="@color/colorOrange"
+                android:textSize="@dimen/text_size_medium" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/colorOrange" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="!!"
+                android:textColor="@color/colorOrange"
+                android:textSize="@dimen/text_size_medium" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/colorOrange" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="!!!"
+                android:textColor="@color/colorOrange"
+                android:textSize="@dimen/text_size_medium" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@color/colorGreyDark"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -8,4 +8,13 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+
+    <style name="Theme.Custom.Material.Alert.Dialog.Light" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+        <item name="materialButtonStyle">@style/Widget.AppCompat.Button.Borderless</item>
+    </style>
+
+    <style name="MyAlertDialogTheme" parent="@style/Theme.Custom.Material.Alert.Dialog.Light">
+        <item name="android:textColor">@color/colorGreyDark</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+    </style>
 </resources>
