@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.util.Log
 import android.view.View
+import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,20 +23,35 @@ class MainViewModel : ViewModel() {
     val usernameObservable = ObservableField<String>()
 
     val tasks = ArrayList<TaskModel>()
+    val allTasks = ArrayList<TaskModel>()
     var tasksAdapter: TasksAdapter
 
     val newTask = MutableLiveData<AlertDialog.Builder>()
+
+    var filterApplied = ObservableBoolean(false)
 
     init {
         tasksAdapter = TasksAdapter(tasks)
     }
 
     fun back(view: View) {
-
+        LoginSession.clearData(view.context)
     }
 
     fun filter(view: View) {
+        filterApplied.set(filterApplied.get().not())
 
+        if (filterApplied.get()) {
+            tasks.clear()
+            for (task in allTasks)
+                if (task.done)
+                    tasks.add(task)
+            tasksAdapter.notifyDataSetChanged()
+        } else {
+            tasks.clear()
+            tasks.addAll(allTasks)
+            tasksAdapter.notifyDataSetChanged()
+        }
     }
 
     fun add(view: View) {
@@ -53,6 +69,8 @@ class MainViewModel : ViewModel() {
                     exception: FirebaseFirestoreException?
                 ) {
                     Utilities.dismissLoading(loadingDialog)
+                    tasks.clear()
+                    allTasks.clear()
                     if (exception != null) {
                         Log.e(TAG, "error", exception)
                         return
@@ -60,18 +78,20 @@ class MainViewModel : ViewModel() {
 
                     if (snapshots != null) {
                         for (doc in snapshots.documents) {
-                            tasks.add(
-                                TaskModel(
-                                    doc["userid"] as String
-                                    , doc["title"] as String
-                                    , doc["date"] as String
-                                    , doc["done"] as Boolean
-                                    , doc["priority"] as Long
-                                )
+                            val task = TaskModel(
+                                doc.id,
+                                doc["userid"] as String
+                                , doc["title"] as String
+                                , doc["date"] as String
+                                , doc["done"] as Boolean
+                                , doc["priority"] as Long
                             )
-                            tasksAdapter.notifyItemInserted(tasks.size - 1)
+                            tasks.add(task)
+                            allTasks.add(task)
                         }
                     }
+
+                    tasksAdapter.notifyDataSetChanged()
                 }
             })
     }

@@ -84,9 +84,4 @@ class MainActivity : AppCompatActivity() {
                 alertDialog.show()
             })
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        LoginSession.clearData(this)
-    }
 }

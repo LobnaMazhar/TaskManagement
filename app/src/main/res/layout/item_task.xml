@@ -21,8 +21,9 @@
             android:layout_height="48dp"
             android:layout_marginStart="@dimen/margin_padding_size_medium"
             android:layout_marginTop="@dimen/margin_padding_size_medium"
+            android:onClick="@{tivm::markAsDone}"
             android:layout_marginBottom="@dimen/margin_padding_size_medium"
-            android:src="@drawable/ic_tick_done"
+            android:src="@{tivm.taskObservable.done ? @drawable/ic_tick_done : @drawable/ic_tick_undone}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -68,13 +69,16 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
+                android:id="@+id/priority_1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="1"
+                android:background="@{tivm.taskObservable.priority == 1 ? @drawable/shape_rectangle_orange_rounded_start_8 : null}"
                 android:gravity="center"
+                android:onClick="@{tivm::setPriority}"
                 android:text="!"
-                android:textColor="@color/colorOrange"
+                android:textColor="@{tivm.taskObservable.priority == 1 ? @color/colorWhite : @color/colorOrange}"
                 android:textSize="@dimen/text_size_medium" />
 
             <View
@@ -83,13 +87,16 @@
                 android:background="@color/colorOrange" />
 
             <TextView
+                android:id="@+id/priority_2"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="1"
+                android:background="@{tivm.taskObservable.priority == 2 ? @color/colorOrange : @android:color/transparent}"
                 android:gravity="center"
+                android:onClick="@{tivm::setPriority}"
                 android:text="!!"
-                android:textColor="@color/colorOrange"
+                android:textColor="@{tivm.taskObservable.priority == 2 ? @color/colorWhite : @color/colorOrange}"
                 android:textSize="@dimen/text_size_medium" />
 
             <View
@@ -98,13 +105,16 @@
                 android:background="@color/colorOrange" />
 
             <TextView
+                android:id="@+id/priority_3"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="1"
+                android:background="@{tivm.taskObservable.priority == 3 ? @drawable/shape_rectangle_orange_rounded_end_8 : null}"
                 android:gravity="center"
+                android:onClick="@{tivm::setPriority}"
                 android:text="!!!"
-                android:textColor="@color/colorOrange"
+                android:textColor="@{tivm.taskObservable.priority == 3 ? @color/colorWhite : @color/colorOrange}"
                 android:textSize="@dimen/text_size_medium" />
 
         </LinearLayout>
