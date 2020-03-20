@@ -95,4 +95,10 @@ class MainViewModel : ViewModel() {
                 }
             })
     }
+
+    fun delete(position: Int) {
+        FirebaseFirestore.getInstance()
+            .collection("tasks")
+            .document(tasks[position].id).delete()
+    }
 }

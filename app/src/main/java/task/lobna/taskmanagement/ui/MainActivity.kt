@@ -10,11 +10,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.shaiik.authentication.LoginSession
 import com.shaiik.utilities.Utilities
+import kotlinx.android.synthetic.main.activity_main.*
 import task.lobna.taskmanagement.R
 import task.lobna.taskmanagement.databinding.ActivityMainBinding
+import task.lobna.taskmanagement.utils.SwipeToDeleteCallback
 import task.lobna.taskmanagement.viewmodel.MainViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -24,15 +28,20 @@ class MainActivity : AppCompatActivity() {
 
     val TAG = MainActivity::class.java.simpleName
 
+    lateinit var mainViewModel: MainViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val activityMainBinding =
             DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
 
-        val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         activityMainBinding.mvm = mainViewModel
 
         mainViewModel.usernameObservable.set(LoginSession.getUserData(this).username + "'s Tasks")
+
+        initSwipeToDelete()
+
         mainViewModel.getData(this)
 
         mainViewModel.newTask.observe(this,
@@ -83,5 +92,15 @@ class MainActivity : AppCompatActivity() {
 
                 alertDialog.show()
             })
+    }
+
+    private fun initSwipeToDelete() {
+        val swipeHandler = object : SwipeToDeleteCallback(this) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                mainViewModel.delete(viewHolder.adapterPosition)
+            }
+        }
+        val itemTouchHelper = ItemTouchHelper(swipeHandler)
+        itemTouchHelper.attachToRecyclerView(tasks_recyclerview)
     }
 }
