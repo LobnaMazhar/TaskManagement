@@ -1,8 +1,11 @@
 package task.lobna.taskmanagement.viewmodel
 
+import android.app.DatePickerDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.util.Log
 import android.view.View
+import android.widget.DatePicker
 import androidx.databinding.ObservableField
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,6 +18,10 @@ import comment.lobna.commentmanagement.ui.adapter.CommentsAdapter
 import task.lobna.taskmanagement.R
 import task.lobna.taskmanagement.data.CommentModel
 import task.lobna.taskmanagement.data.TaskModel
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class TaskDetailsViewModel : ViewModel() {
 
@@ -72,6 +79,76 @@ class TaskDetailsViewModel : ViewModel() {
 
         val task = taskObservable.get()
         task!!.done = true
+        taskObservable.set(task)
+        taskObservable.notifyChange()
+    }
+
+    fun changeDate(view: View) {
+        var selectedDate = taskObservable.get()!!.date
+
+        var simpleDateFormat = SimpleDateFormat("MMMM dd yyyy", Locale.US)
+        var year: Int
+        var month: Int
+        var day: Int
+        if (selectedDate.isNullOrBlank()) {
+            val c = Calendar.getInstance()
+            year = c.get(Calendar.YEAR)
+            month = c.get(Calendar.MONTH)
+            day = c.get(Calendar.DAY_OF_MONTH)
+        } else {
+            var date = simpleDateFormat.parse(selectedDate)
+
+            simpleDateFormat = SimpleDateFormat("yyyy", Locale.US)
+            year = simpleDateFormat.format(date).toInt()
+
+            simpleDateFormat = SimpleDateFormat("MM", Locale.US)
+            month = simpleDateFormat.format(date).toInt() - 1
+
+            simpleDateFormat = SimpleDateFormat("dd", Locale.US)
+            day = simpleDateFormat.format(date).toInt()
+        }
+
+        val datePickerDialog = DatePickerDialog(
+            view.context,
+            object : DatePickerDialog.OnDateSetListener {
+                override fun onDateSet(
+                    p0: DatePicker?,
+                    year: Int,
+                    monthOfYear: Int,
+                    dayOfMonth: Int
+                ) {
+                    simpleDateFormat = SimpleDateFormat("yyyy MM dd", Locale.US)
+                    val month = monthOfYear + 1
+                    val date = simpleDateFormat.parse("$year $month $dayOfMonth")
+                    simpleDateFormat = SimpleDateFormat("MMMM dd yyyy", Locale.US)
+                    selectedDate = simpleDateFormat.format(date)
+                    updateDate(selectedDate)
+                }
+            },
+            year,
+            month,
+            day
+        )
+
+        datePickerDialog.setOnCancelListener(object : DialogInterface.OnCancelListener {
+            override fun onCancel(p0: DialogInterface?) {
+
+                selectedDate = ""
+                updateDate(selectedDate)
+            }
+        })
+
+        datePickerDialog.show()
+    }
+
+    private fun updateDate(date: String) {
+        FirebaseFirestore.getInstance()
+            .collection("tasks")
+            .document(taskObservable.get()!!.id)
+            .update("date", date)
+
+        val task = taskObservable.get()
+        task!!.date = date
         taskObservable.set(task)
         taskObservable.notifyChange()
     }

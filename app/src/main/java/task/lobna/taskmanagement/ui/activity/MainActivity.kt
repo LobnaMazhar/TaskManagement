@@ -1,12 +1,14 @@
 package task.lobna.taskmanagement.ui.activity
 
+import android.app.DatePickerDialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
+import android.view.View
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -53,7 +55,59 @@ class MainActivity : AppCompatActivity() {
                 val alertDialog = builder.create()
 
                 val titleEditText = view.findViewById<EditText>(R.id.title_edit_text)
+                val dateImageView = view.findViewById<ImageView>(R.id.date_iv)
                 val createButton = view.findViewById<Button>(R.id.create_button)
+
+                var selectedDate = ""
+                val c = Calendar.getInstance()
+                val year = c.get(Calendar.YEAR)
+                val month = c.get(Calendar.MONTH)
+                val day = c.get(Calendar.DAY_OF_MONTH)
+                val datePickerDialog = DatePickerDialog(
+                    this@MainActivity,
+                    object : DatePickerDialog.OnDateSetListener {
+                        override fun onDateSet(
+                            p0: DatePicker?,
+                            year: Int,
+                            monthOfYear: Int,
+                            dayOfMonth: Int
+                        ) {
+                            dateImageView.setColorFilter(
+                                ContextCompat.getColor(
+                                    this@MainActivity,
+                                    R.color.colorPrimary
+                                )
+                            )
+
+                            var simpleDateFormat = SimpleDateFormat("yyyy MM dd", Locale.US)
+                            val month = monthOfYear + 1
+                            val date = simpleDateFormat.parse("$year $month $dayOfMonth")
+                            simpleDateFormat = SimpleDateFormat("MMMM dd yyyy", Locale.US)
+                            selectedDate = simpleDateFormat.format(date)
+                        }
+                    },
+                    year,
+                    month,
+                    day
+                )
+
+                datePickerDialog.setOnCancelListener(object : DialogInterface.OnCancelListener {
+                    override fun onCancel(p0: DialogInterface?) {
+                        dateImageView.setColorFilter(
+                            ContextCompat.getColor(
+                                this@MainActivity,
+                                R.color.colorGreyLight
+                            )
+                        )
+                        selectedDate = ""
+                    }
+                })
+
+                dateImageView.setOnClickListener(object : View.OnClickListener {
+                    override fun onClick(p0: View?) {
+                        datePickerDialog.show()
+                    }
+                })
 
                 createButton.setOnClickListener {
                     val title = titleEditText.text
@@ -64,16 +118,12 @@ class MainActivity : AppCompatActivity() {
 
 //                        val loadingDialog = Utilities.showLoading(this)
 
-                        val date = Date()
-                        val simpleDateFormat = SimpleDateFormat("MMMM dd yyyy")
-                        val currentDate = simpleDateFormat.format(date)
-
                         val map = HashMap<String, Any>()
                         map["userid"] = LoginSession.getUserData(this@MainActivity).id
                         map["title"] = title.toString()
                         map["priority"] = 0
                         map["done"] = false
-                        map["date"] = currentDate
+                        map["date"] = selectedDate
                         FirebaseFirestore.getInstance().collection("tasks")
                             .add(map).addOnSuccessListener { p0 ->
 //                                Utilities.dismissLoading(loadingDialog)

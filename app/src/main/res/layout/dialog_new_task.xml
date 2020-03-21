@@ -14,20 +14,36 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
         android:textColor="@color/colorGreyDark" />
 
-    <EditText
-        android:id="@+id/title_edit_text"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_padding_size_medium"
         android:layout_marginTop="@dimen/margin_padding_size_medium"
         android:layout_marginEnd="@dimen/margin_padding_size_medium"
-        android:background="@drawable/shape_rectangle_rounded_8"
-        android:hint="@string/task_title"
-        android:inputType="textPersonName"
-        android:padding="@dimen/margin_padding_size_medium"
-        android:textColor="@color/colorGreyDark"
-        android:textColorHint="@color/colorGreyLight"
-        android:textSize="@dimen/text_size_medium" />
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/title_edit_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_padding_size_medium"
+            android:layout_weight="1"
+            android:background="@drawable/shape_rectangle_rounded_8"
+            android:hint="@string/task_title"
+            android:inputType="textPersonName"
+            android:padding="@dimen/margin_padding_size_medium"
+            android:textColor="@color/colorGreyDark"
+            android:textColorHint="@color/colorGreyLight"
+            android:textSize="@dimen/text_size_medium" />
+
+        <ImageView
+            android:id="@+id/date_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_date"
+            android:tint="@color/colorGreyLight" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/create_button"
@@ -35,8 +51,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_padding_size_medium"
         android:layout_marginTop="@dimen/margin_padding_size_medium"
-        android:layout_marginBottom="@dimen/margin_padding_size_large"
         android:layout_marginEnd="@dimen/margin_padding_size_medium"
+        android:layout_marginBottom="@dimen/margin_padding_size_large"
         android:background="@color/colorPrimary"
         android:padding="@dimen/margin_padding_size_medium"
         android:text="@string/create"

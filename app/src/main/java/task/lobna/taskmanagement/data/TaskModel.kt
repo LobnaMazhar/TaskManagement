@@ -7,7 +7,7 @@ data class TaskModel(
     val id: String,
     val userid: String,
     val title: String,
-    val date: String,
+    var date: String,
     var done: Boolean,
     var priority: Long
 ) : Parcelable {
