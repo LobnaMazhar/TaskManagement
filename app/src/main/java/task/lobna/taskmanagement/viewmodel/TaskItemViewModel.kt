@@ -5,9 +5,9 @@ import android.os.Bundle
 import android.view.View
 import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
-import com.google.firebase.firestore.FirebaseFirestore
 import task.lobna.taskmanagement.R
 import task.lobna.taskmanagement.data.TaskModel
+import task.lobna.taskmanagement.repository.TaskRepository
 import task.lobna.taskmanagement.ui.activity.TaskDetailsActivity
 
 class TaskItemViewModel(var task: TaskModel) : ViewModel() {
@@ -19,10 +19,7 @@ class TaskItemViewModel(var task: TaskModel) : ViewModel() {
     }
 
     fun markAsDone(view: View) {
-        FirebaseFirestore.getInstance()
-            .collection("tasks")
-            .document(task.id)
-            .update("done", true)
+        TaskRepository.updateTaskDone(task.id)
     }
 
     fun setPriority(view: View) {
@@ -33,11 +30,8 @@ class TaskItemViewModel(var task: TaskModel) : ViewModel() {
         }
     }
 
-    private fun updatePriority(priority: Int) {
-        FirebaseFirestore.getInstance()
-            .collection("tasks")
-            .document(task.id)
-            .update("priority", priority)
+    private fun updatePriority(priority: Long) {
+        TaskRepository.updateTaskPriority(task.id, priority)
     }
 
     fun goToDetails(view: View) {

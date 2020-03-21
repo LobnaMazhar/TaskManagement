@@ -2,15 +2,12 @@ package task.lobna.taskmanagement.viewmodel
 
 import android.app.DatePickerDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.util.Log
 import android.view.View
-import android.widget.DatePicker
 import androidx.databinding.ObservableField
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.EventListener
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.QuerySnapshot
 import com.shaiik.utilities.Utilities
@@ -18,6 +15,8 @@ import comment.lobna.commentmanagement.ui.adapter.CommentsAdapter
 import task.lobna.taskmanagement.R
 import task.lobna.taskmanagement.data.CommentModel
 import task.lobna.taskmanagement.data.TaskModel
+import task.lobna.taskmanagement.repository.CommentsRepository
+import task.lobna.taskmanagement.repository.TaskRepository
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -52,35 +51,29 @@ class TaskDetailsViewModel : ViewModel() {
             map["comment"] = comment.toString()
             map["timestamp"] = System.currentTimeMillis()
 
-            FirebaseFirestore.getInstance().collection("comments")
-                .add(map).addOnSuccessListener { p0 ->
+            CommentsRepository.createComment(map).addOnSuccessListener { p0 ->
 //                                Utilities.dismissLoading(loadingDialog)
-                    commentObservable.set(null)
-                    Utilities.hideKeyboard(view)
-                }.addOnFailureListener { e ->
+                commentObservable.set(null)
+                Utilities.hideKeyboard(view)
+            }.addOnFailureListener { e ->
 //                                Utilities.dismissLoading(loadingDialog)
-                    Log.e(TAG, "Error writing document", e)
-                }
+                Log.e(TAG, "Error writing document", e)
+            }
         }
     }
 
     fun delete(view: View) {
-        FirebaseFirestore.getInstance()
-            .collection("tasks")
-            .document(taskObservable.get()!!.id).delete()
-        back(view)
+        TaskRepository.deleteTask(taskObservable.get()!!.id).addOnSuccessListener { back(view) }
     }
 
     fun markAsDone(view: View) {
-        FirebaseFirestore.getInstance()
-            .collection("tasks")
-            .document(taskObservable.get()!!.id)
-            .update("done", true)
-
-        val task = taskObservable.get()
-        task!!.done = true
-        taskObservable.set(task)
-        taskObservable.notifyChange()
+        TaskRepository.updateTaskDone(taskObservable.get()!!.id)
+            .addOnSuccessListener {
+                val task = taskObservable.get()
+                task!!.done = true
+                taskObservable.set(task)
+                taskObservable.notifyChange()
+            }
     }
 
     fun changeDate(view: View) {
@@ -110,47 +103,36 @@ class TaskDetailsViewModel : ViewModel() {
 
         val datePickerDialog = DatePickerDialog(
             view.context,
-            object : DatePickerDialog.OnDateSetListener {
-                override fun onDateSet(
-                    p0: DatePicker?,
-                    year: Int,
-                    monthOfYear: Int,
-                    dayOfMonth: Int
-                ) {
-                    simpleDateFormat = SimpleDateFormat("yyyy MM dd", Locale.US)
-                    val month = monthOfYear + 1
-                    val date = simpleDateFormat.parse("$year $month $dayOfMonth")
-                    simpleDateFormat = SimpleDateFormat("MMMM dd yyyy", Locale.US)
-                    selectedDate = simpleDateFormat.format(date)
-                    updateDate(selectedDate)
-                }
+            DatePickerDialog.OnDateSetListener { p0, year, monthOfYear, dayOfMonth ->
+                simpleDateFormat = SimpleDateFormat("yyyy MM dd", Locale.US)
+                val month = monthOfYear + 1
+                val date = simpleDateFormat.parse("$year $month $dayOfMonth")
+                simpleDateFormat = SimpleDateFormat("MMMM dd yyyy", Locale.US)
+                selectedDate = simpleDateFormat.format(date)
+                updateDate(selectedDate)
             },
             year,
             month,
             day
         )
 
-        datePickerDialog.setOnCancelListener(object : DialogInterface.OnCancelListener {
-            override fun onCancel(p0: DialogInterface?) {
-
-                selectedDate = ""
-                updateDate(selectedDate)
-            }
-        })
+        datePickerDialog.setOnCancelListener {
+            selectedDate = ""
+            updateDate(selectedDate)
+        }
+        datePickerDialog.datePicker.minDate = System.currentTimeMillis()
 
         datePickerDialog.show()
     }
 
     private fun updateDate(date: String) {
-        FirebaseFirestore.getInstance()
-            .collection("tasks")
-            .document(taskObservable.get()!!.id)
-            .update("date", date)
-
-        val task = taskObservable.get()
-        task!!.date = date
-        taskObservable.set(task)
-        taskObservable.notifyChange()
+        TaskRepository.updateTaskDate(taskObservable.get()!!.id, date)
+            .addOnSuccessListener {
+                val task = taskObservable.get()
+                task!!.date = date
+                taskObservable.set(task)
+                taskObservable.notifyChange()
+            }
     }
 
     fun setPriority(view: View) {
@@ -162,23 +144,18 @@ class TaskDetailsViewModel : ViewModel() {
     }
 
     private fun updatePriority(priority: Long) {
-        FirebaseFirestore.getInstance()
-            .collection("tasks")
-            .document(taskObservable.get()!!.id)
-            .update("priority", priority)
-
-        val task = taskObservable.get()
-        task!!.priority = priority
-        taskObservable.set(task)
-        taskObservable.notifyChange()
+        TaskRepository.updateTaskPriority(taskObservable.get()!!.id, priority)
+            .addOnSuccessListener {
+                val task = taskObservable.get()
+                task!!.priority = priority
+                taskObservable.set(task)
+                taskObservable.notifyChange()
+            }
     }
 
     fun getComments(context: Context) {
         val loadingDialog = Utilities.showLoading(context)
-        FirebaseFirestore.getInstance()
-            .collection("comments")
-            .whereEqualTo("taskid", taskObservable.get()!!.id)
-            .orderBy("timestamp")
+        CommentsRepository.getCommentsByTask(taskObservable.get()!!.id)
             .addSnapshotListener(object : EventListener<QuerySnapshot> {
                 override fun onEvent(
                     snapshots: QuerySnapshot?,

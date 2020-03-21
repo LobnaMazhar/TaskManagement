@@ -5,10 +5,10 @@ import android.view.View
 import androidx.databinding.ObservableField
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.firestore.FirebaseFirestore
 import com.shaiik.utilities.Utilities
 import task.lobna.taskmanagement.R
 import task.lobna.taskmanagement.data.UserModel
+import task.lobna.taskmanagement.repository.UserRepository
 
 
 class LoginViewModel : ViewModel() {
@@ -28,23 +28,15 @@ class LoginViewModel : ViewModel() {
         } else {
             Utilities.hideKeyboard(view)
             val loadingDialog = Utilities.showLoading(view.context)
-            val db = FirebaseFirestore.getInstance().collection("users")
-            db.whereEqualTo("username", username)
-                .limit(1)
-                .get()
+            UserRepository.getUser(username)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val isEmpty = task.result!!.isEmpty
                         if (isEmpty) {
-                            val map = HashMap<String, String>()
+                            val map = HashMap<String, Any>()
                             map.set("username", username)
-                            db.add(map).addOnSuccessListener { p0 ->
-                                val userModel =
-                                    UserModel(
-                                        p0!!.id,
-                                        username
-                                    )
-                                userLogin.value = userModel
+                            UserRepository.createUser(map).addOnSuccessListener { p0 ->
+                                applyLogin(p0!!.id, username)
                                 Utilities.dismissLoading(loadingDialog)
                             }.addOnFailureListener { e ->
                                 Utilities.dismissLoading(loadingDialog)
@@ -53,12 +45,7 @@ class LoginViewModel : ViewModel() {
                         } else {
                             if (task.result!!.documents[0].exists()) {
                                 val doc = task.result!!.documents[0]
-                                val userModel =
-                                    UserModel(
-                                        doc.id,
-                                        doc.data!!["username"].toString()
-                                    )
-                                userLogin.value = userModel
+                                applyLogin(doc.id, doc.data!!["username"].toString())
                                 Utilities.dismissLoading(loadingDialog)
                             }
                         }
@@ -67,5 +54,9 @@ class LoginViewModel : ViewModel() {
                     }
                 }
         }
+    }
+
+    private fun applyLogin(id: String, username: String) {
+        userLogin.value = UserModel(id, username)
     }
 }

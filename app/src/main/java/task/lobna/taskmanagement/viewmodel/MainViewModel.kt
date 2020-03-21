@@ -9,12 +9,12 @@ import androidx.databinding.ObservableField
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.EventListener
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.QuerySnapshot
 import com.shaiik.authentication.LoginSession
 import com.shaiik.utilities.Utilities
 import task.lobna.taskmanagement.data.TaskModel
+import task.lobna.taskmanagement.repository.TaskRepository
 import task.lobna.taskmanagement.ui.adapter.TasksAdapter
 
 class MainViewModel : ViewModel() {
@@ -60,9 +60,7 @@ class MainViewModel : ViewModel() {
 
     fun getData(context: Context) {
         val loadingDialog = Utilities.showLoading(context)
-        FirebaseFirestore.getInstance()
-            .collection("tasks")
-            .whereEqualTo("userid", LoginSession.getUserData(context).id)
+        TaskRepository.getTasksByUser(context)
             .addSnapshotListener(object : EventListener<QuerySnapshot> {
                 override fun onEvent(
                     snapshots: QuerySnapshot?,
@@ -97,8 +95,6 @@ class MainViewModel : ViewModel() {
     }
 
     fun delete(position: Int) {
-        FirebaseFirestore.getInstance()
-            .collection("tasks")
-            .document(tasks[position].id).delete()
+        TaskRepository.deleteTask(tasks[position].id)
     }
 }

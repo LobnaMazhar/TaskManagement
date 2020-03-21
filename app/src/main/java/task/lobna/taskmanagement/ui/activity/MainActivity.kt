@@ -1,5 +1,6 @@
 package task.lobna.taskmanagement.ui.activity
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.DialogInterface
 import android.os.Bundle
@@ -14,12 +15,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.firestore.FirebaseFirestore
 import com.shaiik.authentication.LoginSession
 import com.shaiik.utilities.Utilities
 import kotlinx.android.synthetic.main.activity_main.*
 import task.lobna.taskmanagement.R
 import task.lobna.taskmanagement.databinding.ActivityMainBinding
+import task.lobna.taskmanagement.repository.TaskRepository
 import task.lobna.taskmanagement.utils.SwipeToDeleteCallback
 import task.lobna.taskmanagement.viewmodel.MainViewModel
 import java.text.SimpleDateFormat
@@ -31,6 +32,9 @@ class MainActivity : AppCompatActivity() {
     val TAG = MainActivity::class.java.simpleName
 
     lateinit var mainViewModel: MainViewModel
+    lateinit var newTaskDialog: AlertDialog
+    lateinit var datePickerDialog: DatePickerDialog
+    lateinit var selectedDate: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,99 +52,8 @@ class MainActivity : AppCompatActivity() {
 
         mainViewModel.newTask.observe(this,
             Observer { builder ->
-                val view =
-                    LayoutInflater.from(this@MainActivity).inflate(R.layout.dialog_new_task, null)
-                builder!!.setView(view)
-
-                val alertDialog = builder.create()
-
-                val titleEditText = view.findViewById<EditText>(R.id.title_edit_text)
-                val dateImageView = view.findViewById<ImageView>(R.id.date_iv)
-                val createButton = view.findViewById<Button>(R.id.create_button)
-
-                var selectedDate = ""
-                val c = Calendar.getInstance()
-                val year = c.get(Calendar.YEAR)
-                val month = c.get(Calendar.MONTH)
-                val day = c.get(Calendar.DAY_OF_MONTH)
-                val datePickerDialog = DatePickerDialog(
-                    this@MainActivity,
-                    object : DatePickerDialog.OnDateSetListener {
-                        override fun onDateSet(
-                            p0: DatePicker?,
-                            year: Int,
-                            monthOfYear: Int,
-                            dayOfMonth: Int
-                        ) {
-                            dateImageView.setColorFilter(
-                                ContextCompat.getColor(
-                                    this@MainActivity,
-                                    R.color.colorPrimary
-                                )
-                            )
-
-                            var simpleDateFormat = SimpleDateFormat("yyyy MM dd", Locale.US)
-                            val month = monthOfYear + 1
-                            val date = simpleDateFormat.parse("$year $month $dayOfMonth")
-                            simpleDateFormat = SimpleDateFormat("MMMM dd yyyy", Locale.US)
-                            selectedDate = simpleDateFormat.format(date)
-                        }
-                    },
-                    year,
-                    month,
-                    day
-                )
-
-                datePickerDialog.setOnCancelListener(object : DialogInterface.OnCancelListener {
-                    override fun onCancel(p0: DialogInterface?) {
-                        dateImageView.setColorFilter(
-                            ContextCompat.getColor(
-                                this@MainActivity,
-                                R.color.colorGreyLight
-                            )
-                        )
-                        selectedDate = ""
-                    }
-                })
-
-                dateImageView.setOnClickListener(object : View.OnClickListener {
-                    override fun onClick(p0: View?) {
-                        datePickerDialog.show()
-                    }
-                })
-
-                createButton.setOnClickListener {
-                    val title = titleEditText.text
-                    if (title.isNullOrEmpty()) {
-                        titleEditText.error = getString(R.string.field_required)
-                    } else {
-                        Utilities.hideKeyboard(it)
-
-//                        val loadingDialog = Utilities.showLoading(this)
-
-                        val map = HashMap<String, Any>()
-                        map["userid"] = LoginSession.getUserData(this@MainActivity).id
-                        map["title"] = title.toString()
-                        map["priority"] = 0
-                        map["done"] = false
-                        map["date"] = selectedDate
-                        FirebaseFirestore.getInstance().collection("tasks")
-                            .add(map).addOnSuccessListener { p0 ->
-//                                Utilities.dismissLoading(loadingDialog)
-                                Toast.makeText(
-                                    this@MainActivity,
-                                    "Task has been added successfully",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                alertDialog.dismiss()
-                            }.addOnFailureListener { e ->
-//                                Utilities.dismissLoading(loadingDialog)
-                                Log.e(TAG, "Error writing document", e)
-                            }
-                    }
-                }
-
-                alertDialog.show()
+                initNewTaskDialog(builder)
+                newTaskDialog.show()
             })
     }
 
@@ -152,5 +65,108 @@ class MainActivity : AppCompatActivity() {
         }
         val itemTouchHelper = ItemTouchHelper(swipeHandler)
         itemTouchHelper.attachToRecyclerView(tasks_recyclerview)
+    }
+
+    private fun initNewTaskDialog(builder: AlertDialog.Builder) {
+        val view =
+            LayoutInflater.from(this@MainActivity).inflate(R.layout.dialog_new_task, null)
+        builder.setView(view)
+
+        newTaskDialog = builder.create()
+
+        val titleEditText = view.findViewById<EditText>(R.id.title_edit_text)
+        val dateImageView = view.findViewById<ImageView>(R.id.date_iv)
+        val createButton = view.findViewById<Button>(R.id.create_button)
+
+        selectedDate = ""
+        initDatePickerDialog(dateImageView)
+
+
+        dateImageView.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(p0: View?) {
+                datePickerDialog.show()
+            }
+        })
+
+        createButton.setOnClickListener {
+            val title = titleEditText.text
+            if (title.isNullOrEmpty()) {
+                titleEditText.error = getString(R.string.field_required)
+            } else {
+                Utilities.hideKeyboard(it)
+
+                val loadingDialog = Utilities.showLoading(this)
+
+                val map = HashMap<String, Any>()
+                map["userid"] = LoginSession.getUserData(this@MainActivity).id
+                map["title"] = title.toString()
+                map["priority"] = 0
+                map["done"] = false
+                map["date"] = selectedDate
+                map["created_on"] = System.currentTimeMillis()
+                TaskRepository
+                    .createTask(map)
+                    .addOnSuccessListener { p0 ->
+                        Utilities.dismissLoading(loadingDialog)
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Task has been added successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        newTaskDialog.dismiss()
+                    }.addOnFailureListener { e ->
+                        Utilities.dismissLoading(loadingDialog)
+                        Log.e(TAG, "Error writing document", e)
+                    }
+            }
+        }
+    }
+
+    private fun initDatePickerDialog(dateImageView: ImageView) {
+        val c = Calendar.getInstance()
+        val year = c.get(Calendar.YEAR)
+        val month = c.get(Calendar.MONTH)
+        val day = c.get(Calendar.DAY_OF_MONTH)
+
+        datePickerDialog = DatePickerDialog(
+            this@MainActivity,
+            object : DatePickerDialog.OnDateSetListener {
+                override fun onDateSet(
+                    p0: DatePicker?,
+                    year: Int,
+                    monthOfYear: Int,
+                    dayOfMonth: Int
+                ) {
+                    dateImageView.setColorFilter(
+                        ContextCompat.getColor(
+                            this@MainActivity,
+                            R.color.colorPrimary
+                        )
+                    )
+
+                    var simpleDateFormat = SimpleDateFormat("yyyy MM dd", Locale.US)
+                    val month = monthOfYear + 1
+                    val date = simpleDateFormat.parse("$year $month $dayOfMonth")
+                    simpleDateFormat = SimpleDateFormat("MMMM dd yyyy", Locale.US)
+                    selectedDate = simpleDateFormat.format(date)
+                }
+            },
+            year,
+            month,
+            day
+        )
+        datePickerDialog.datePicker.minDate = System.currentTimeMillis()
+
+        datePickerDialog.setOnCancelListener(object : DialogInterface.OnCancelListener {
+            override fun onCancel(p0: DialogInterface?) {
+                dateImageView.setColorFilter(
+                    ContextCompat.getColor(
+                        this@MainActivity,
+                        R.color.colorGreyLight
+                    )
+                )
+                selectedDate = ""
+            }
+        })
     }
 }
