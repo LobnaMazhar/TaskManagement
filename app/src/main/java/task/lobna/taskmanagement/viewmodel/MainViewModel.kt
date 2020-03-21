@@ -15,7 +15,7 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.shaiik.authentication.LoginSession
 import com.shaiik.utilities.Utilities
 import task.lobna.taskmanagement.data.TaskModel
-import task.lobna.taskmanagement.ui.TasksAdapter
+import task.lobna.taskmanagement.ui.adapter.TasksAdapter
 
 class MainViewModel : ViewModel() {
     val TAG = MainViewModel::class.java.simpleName

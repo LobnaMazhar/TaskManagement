@@ -1,11 +1,14 @@
 package task.lobna.taskmanagement.viewmodel
 
+import android.content.Intent
+import android.os.Bundle
 import android.view.View
 import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import task.lobna.taskmanagement.R
 import task.lobna.taskmanagement.data.TaskModel
+import task.lobna.taskmanagement.ui.activity.TaskDetailsActivity
 
 class TaskItemViewModel(var task: TaskModel) : ViewModel() {
 
@@ -15,7 +18,7 @@ class TaskItemViewModel(var task: TaskModel) : ViewModel() {
         taskObservable.set(task)
     }
 
-    fun markAsDone(view:View){
+    fun markAsDone(view: View) {
         FirebaseFirestore.getInstance()
             .collection("tasks")
             .document(task.id)
@@ -35,6 +38,14 @@ class TaskItemViewModel(var task: TaskModel) : ViewModel() {
             .collection("tasks")
             .document(task.id)
             .update("priority", priority)
+    }
+
+    fun goToDetails(view: View) {
+        val intent = Intent(view.context, TaskDetailsActivity::class.java)
+        val bundle = Bundle()
+        bundle.putParcelable("task", task)
+        intent.putExtra("data", bundle)
+        view.context.startActivity(intent)
     }
 
 }

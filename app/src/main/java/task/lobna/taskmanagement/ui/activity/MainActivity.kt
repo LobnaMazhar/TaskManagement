@@ -1,4 +1,4 @@
-package task.lobna.taskmanagement.ui
+package task.lobna.taskmanagement.ui.activity
 
 import android.os.Bundle
 import android.util.Log

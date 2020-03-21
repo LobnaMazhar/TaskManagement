@@ -1,4 +1,4 @@
-package task.lobna.taskmanagement.ui
+package task.lobna.taskmanagement.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

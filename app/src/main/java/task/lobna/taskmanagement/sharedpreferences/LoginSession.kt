@@ -5,7 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import task.lobna.taskmanagement.data.UserModel
-import task.lobna.taskmanagement.ui.LoginActivity
+import task.lobna.taskmanagement.ui.activity.LoginActivity
 
 object LoginSession {
     private const val USER_DATA_KEY = "userData"
